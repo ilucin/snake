@@ -1,21 +1,15 @@
 (function() {
   'use strict';
 
-  const Snake = window.Snake;
-  const {canvas, utils} = Snake;
-  const {screenWidth, screenHeight, render, init: initCanvas, startFrameLoop} = canvas;
-  const {randomInt, pickRandom} = utils;
-  const {SNAKE_CELL, EMPTY_CELL, FOOD_CELL, MAX_CYCLE_BETWEEN_FOOD, MAX_FOOD, MAX_FOOD_DURATION, MIN_FOOD_DURATION} = Snake.consts;
+  const SnakeGame = window.SnakeGame;
+  const {screenWidth, screenHeight, render, init: initCanvas, startFrameLoop} = SnakeGame.Canvas;
+  const {randomInt} = SnakeGame.Utils;
+  const {SNAKE_CELL, EMPTY_CELL, FOOD_CELL, MAX_CYCLE_BETWEEN_FOOD, MAX_FOOD, MAX_FOOD_DURATION, MIN_FOOD_DURATION} = SnakeGame.Consts;
+  const {Direction, Collision} = SnakeGame.Enums;
+  const {Grid} = SnakeGame.Classes;
 
-  const LEFT = 1;
-  const RIGHT = 2;
-  const UP = 3;
-  const DOWN = 4;
+  const grid = new Grid(screenWidth, screenHeight);
 
-  const COLLISION_SNAKE_TO_FOOD = 1;
-  const COLLISION_SNAKE_TO_SNAKE = 2;
-
-  const grid = {};
   const snake = [];
   const food = [];
   const feedingProcessors = [];
@@ -24,16 +18,8 @@
   let nextFoodCycle;
   let isPaused = false;
 
-  for (let i = 0; i < screenHeight; i++) {
-    grid[i] = {};
-
-    for (let j = 0; j < screenWidth; j++) {
-      grid[i][j] = EMPTY_CELL;
-    }
-  }
-
   const state = window.state = {
-    snakeDirection: RIGHT,
+    snakeDirection: Direction.RIGHT,
     snake,
     food
   };
@@ -46,22 +32,21 @@
 
   function setCellState(pos, cellState) {
     if (cellState === SNAKE_CELL) {
-      if (grid[pos.y][pos.x] === FOOD_CELL) {
-        return COLLISION_SNAKE_TO_FOOD;
-      } else if (grid[pos.y][pos.x] === SNAKE_CELL) {
-        return COLLISION_SNAKE_TO_SNAKE;
+      const cell = grid.getCell(pos);
+
+      if (cell === FOOD_CELL) {
+        return Collision.SNAKE_TO_FOOD;
+      } else if (cell === SNAKE_CELL) {
+        return Collision.SNAKE_TO_SNAKE;
       }
     }
-    grid[pos.y][pos.x] = cellState;
+
+    grid.setCell(pos, cellState);
     return null;
   }
 
   function die() {
     location.reload();
-  }
-
-  function getCellState(pos) {
-    return grid[pos.y][pos.x];
   }
 
   function normalizePosition(pos) {
@@ -79,31 +64,8 @@
     return pos;
   }
 
-  function getRandomEmptyCellPosition() {
-    let pos;
-
-    for (let i = 0; i < 5; i++) {
-      pos = {x: randomInt(0, screenWidth), y: randomInt(0, screenHeight)};
-      if (getCellState(pos) === EMPTY_CELL) {
-        return pos;
-      }
-    }
-
-    return pickRandom(Object.keys(grid).reduce(function(arr, key1) {
-      const positions = [];
-
-      Object.keys(grid[key1]).forEach((key2) => {
-        if (grid[key1][key2] === EMPTY_CELL) {
-          positions.push({x: key2, y: key1});
-        }
-      });
-
-      return arr.concat(positions);
-    }, []));
-  }
-
   function initSnake() {
-    snake.push(getRandomEmptyCellPosition());
+    snake.push(grid.getRandomEmptyPosition());
   }
 
   function feedSnake() {
@@ -127,7 +89,12 @@
 
   function isValidDirectionChange(newDir) {
     const dir = state.snakeDirection;
-    return newDir && ((newDir === UP && dir !== DOWN) || (newDir === DOWN && dir !== UP) || (newDir === RIGHT && dir !== LEFT) || (newDir === LEFT && dir !== RIGHT));
+    return newDir && (
+      (newDir === Direction.UP && dir !== Direction.DOWN) ||
+      (newDir === Direction.DOWN && dir !== Direction.UP) ||
+      (newDir === Direction.RIGHT && dir !== Direction.LEFT) ||
+      (newDir === Direction.LEFT && dir !== Direction.RIGHT)
+    );
   }
 
   function updateSnakeDirection() {
@@ -151,21 +118,21 @@
       snake[i].y = snake[i - 1].y;
     }
 
-    if (state.snakeDirection === RIGHT) {
+    if (state.snakeDirection === Direction.RIGHT) {
       snake[0].x++;
-    } else if (state.snakeDirection === LEFT) {
+    } else if (state.snakeDirection === Direction.LEFT) {
       snake[0].x--;
-    } else if (state.snakeDirection === UP) {
+    } else if (state.snakeDirection === Direction.UP) {
       snake[0].y--;
-    } else if (state.snakeDirection === DOWN) {
+    } else if (state.snakeDirection === Direction.DOWN) {
       snake[0].y++;
     }
 
     normalizePosition(snake[0]);
     const collision = setCellState(snake[0], SNAKE_CELL);
-    if (collision === COLLISION_SNAKE_TO_FOOD) {
+    if (collision === Collision.SNAKE_TO_FOOD) {
       feedSnake();
-    } else if (collision === COLLISION_SNAKE_TO_SNAKE) {
+    } else if (collision === Collision.SNAKE_TO_SNAKE) {
       die();
     }
   }
@@ -179,7 +146,7 @@
     });
 
     if (frameCycle % MAX_CYCLE_BETWEEN_FOOD === nextFoodCycle && food.length < MAX_FOOD) {
-      const foodUnit = getRandomEmptyCellPosition();
+      const foodUnit = grid.getRandomEmptyPosition();
       foodUnit.cycle = frameCycle;
       foodUnit.duration = randomInt(MIN_FOOD_DURATION, MAX_FOOD_DURATION);
       food.push(foodUnit);
@@ -196,13 +163,13 @@
 
   document.addEventListener('keydown', function(ev) {
     if (ev.which === 40) { // arrow down
-      scheduleDirectionChange(DOWN);
+      scheduleDirectionChange(Direction.DOWN);
     } else if (ev.which === 39) { // arrow right
-      scheduleDirectionChange(RIGHT);
+      scheduleDirectionChange(Direction.RIGHT);
     } else if (ev.which === 38) { // arrow up
-      scheduleDirectionChange(UP);
+      scheduleDirectionChange(Direction.UP);
     } else if (ev.which === 37) { // arrow left
-      scheduleDirectionChange(LEFT);
+      scheduleDirectionChange(Direction.LEFT);
     } else if (ev.which === 80) { // p
       toggleIsPaused();
     }

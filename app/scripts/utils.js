@@ -1,4 +1,4 @@
-(window.Snake = window.Snake || {}).utils = (function() {
+(window.SnakeGame = window.SnakeGame || {}).Utils = (function() {
   'use strict';
 
   function randomInt(min, max) {

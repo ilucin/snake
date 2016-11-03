@@ -1,8 +1,8 @@
-(window.Snake = window.Snake || {}).canvas = (function() {
+(window.SnakeGame = window.SnakeGame || {}).Canvas = (function() {
   'use strict';
 
-  const Snake = window.Snake;
-  const {CELL_SIZE, FRAME_RATE_DROP, SNAKE_CELL, EMPTY_CELL, FOOD_CELL} = Snake.consts;
+  const SnakeGame = window.SnakeGame;
+  const {CELL_SIZE, FRAME_RATE_DROP, SNAKE_CELL, EMPTY_CELL, FOOD_CELL} = SnakeGame.Consts;
 
   const canvasEl = document.querySelector('.canvas');
   const screenWidth = Math.floor(window.innerWidth / CELL_SIZE);
