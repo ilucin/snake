@@ -17,6 +17,31 @@ body {
   overflow: hidden;
 }
 
+.pause-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  background-color: rgba(#000, 0.2);
+  display: none;
+  align-items: center;
+
+  .is-game-paused & {
+    display: flex;
+  }
+
+  .pause-overlay__message {
+    margin: auto;
+    font-size: 24px;
+    text-transform: uppercase;
+    color: #FFF;
+    font-weight: 500;
+    padding: 20px;
+  }
+}
+
 .canvas {
   margin: auto;
 }

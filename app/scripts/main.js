@@ -22,6 +22,7 @@
   const scheduledDirectionChanges = [];
   let frameCycle = 0;
   let nextFoodCycle;
+  let isPaused = false;
 
   for (let i = 0; i < screenHeight; i++) {
     grid[i] = {};
@@ -36,6 +37,12 @@
     snake,
     food
   };
+
+  function scheduleDirectionChange(dir) {
+    if (!isPaused) {
+      scheduledDirectionChanges.push(dir);
+    }
+  }
 
   function setCellState(pos, cellState) {
     if (cellState === SNAKE_CELL) {
@@ -182,15 +189,22 @@
     nextFoodCycle = randomInt(0, MAX_CYCLE_BETWEEN_FOOD);
   }
 
+  function toggleIsPaused() {
+    isPaused = !isPaused;
+    document.body.classList[isPaused ? 'add' : 'remove']('is-game-paused');
+  }
+
   document.addEventListener('keydown', function(ev) {
-    if (ev.which === 40) {
-      scheduledDirectionChanges.push(DOWN);
-    } else if (ev.which === 39) {
-      scheduledDirectionChanges.push(RIGHT);
-    } else if (ev.which === 38) {
-      scheduledDirectionChanges.push(UP);
-    } else if (ev.which === 37) {
-      scheduledDirectionChanges.push(LEFT);
+    if (ev.which === 40) { // arrow down
+      scheduleDirectionChange(DOWN);
+    } else if (ev.which === 39) { // arrow right
+      scheduleDirectionChange(RIGHT);
+    } else if (ev.which === 38) { // arrow up
+      scheduleDirectionChange(UP);
+    } else if (ev.which === 37) { // arrow left
+      scheduleDirectionChange(LEFT);
+    } else if (ev.which === 80) { // p
+      toggleIsPaused();
     }
   });
 
@@ -198,6 +212,10 @@
   initSnake();
 
   startFrameLoop(function() {
+    if (isPaused) {
+      return;
+    }
+
     frameCycle++;
     if (frameCycle === Number.MAX_SAFE_INTEGER) {
       frameCycle = 0;
