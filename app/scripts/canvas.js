@@ -4,11 +4,6 @@
   const Snake = window.Snake;
   const {CELL_SIZE, FRAME_RATE_DROP, SNAKE_CELL, EMPTY_CELL, FOOD_CELL} = Snake.consts;
 
-  const CellColor = {};
-  CellColor[SNAKE_CELL] = '#444';
-  CellColor[EMPTY_CELL] = 'transparent';
-  CellColor[FOOD_CELL] = '#2A2';
-
   const canvasEl = document.querySelector('.canvas');
   const screenWidth = Math.floor(window.innerWidth / CELL_SIZE);
   const screenHeight = Math.floor(window.innerHeight / CELL_SIZE);
@@ -61,8 +56,9 @@
     cell.renderCycle = cellRenderCycle;
 
     if (cell.state !== cellState) {
+      cell.el.classList.remove(cell.state);
       cell.state = cellState;
-      cell.el.style.backgroundColor = CellColor[cellState];
+      cell.el.classList.add(cellState);
 
       if (cellState !== EMPTY_CELL) {
         dirtyCells.push(cell);

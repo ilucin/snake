@@ -47,7 +47,22 @@ body {
 }
 
 .cell {
-  // outline: 1px dashed #F1F1F1;
+  &.snake {
+    background-color: #444444;
+  }
+
+  &.food {
+    background-color: #FAF;
+  }
+
+  &.food,
+  &.snake {
+    background: {
+      size: 100%;
+      position: 50%;
+      repeat: no-repeat;
+    }
+  }
 }
 
 .cell-row {
