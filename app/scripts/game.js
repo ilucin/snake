@@ -32,7 +32,7 @@
     const position = snake.getHeadPosition();
     feedingProcessors.push({
       processOnCycle: frameCycle + snake.getLength(),
-      position
+      position: position.clone()
     });
     food.removeFoodUnitAt(position);
   }
@@ -41,7 +41,7 @@
     feedingProcessors.forEach(function(feeding) {
       if (feeding.processOnCycle === frameCycle) {
         snake.addCellAt(feeding.position);
-        feedingProcessors.splice(feedingProcessors.indexOf(feeding, 1));
+        feedingProcessors.splice(feedingProcessors.indexOf(feeding), 1);
       }
     });
   }
@@ -69,7 +69,7 @@
 
     food.generateFood(frameCycle,
       function getNewFoodPosition() {
-        return grid.getRandomEmptyPosition();
+        return grid.getRandomEmptyPosition() || finishGame();
       },
       function processFoodAddPosition(position) {
         setCellState(position, FOOD_CELL);
@@ -98,7 +98,7 @@
     snake = new Snake(grid.getRandomEmptyPosition(), Direction.RIGHT);
     food = new FoodController();
     feedingProcessors = [];
-    frameCycle = 0;
+    frameCycle = 4;
     finishGame = onGameEnd;
 
     return {

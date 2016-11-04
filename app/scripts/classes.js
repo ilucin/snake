@@ -117,11 +117,10 @@
       const direction = this._direction;
 
       for (let i = cells.length - 1; i > 0; i--) {
-        cells[i].x = cells[i - 1].x;
-        cells[i].y = cells[i - 1].y;
+        cells[i] = cells[i - 1].clone();
       }
 
-      const headCell = cells[0];
+      const headCell = cells[0].clone();
 
       if (direction === Direction.RIGHT) {
         headCell.x++;
@@ -134,6 +133,7 @@
       }
 
       headCell.normalizeForDimensions(width, height);
+      cells[0] = headCell;
     }
 
     addCellAt(position) {
@@ -212,11 +212,14 @@
       const food = this._food;
       if (frameCycle % MAX_CYCLE_BETWEEN_FOOD === this._nextFoodCycle && food.length < MAX_FOOD) {
         const newFoodPosition = getNewFoodPosition();
-        const foodUnit = new FoodUnit(newFoodPosition.x, newFoodPosition.y);
-        foodUnit.cycle = frameCycle;
-        foodUnit.duration = randomInt(MIN_FOOD_DURATION, MAX_FOOD_DURATION);
-        food.push(foodUnit);
-        onFoodAdd(foodUnit);
+
+        if (newFoodPosition) {
+          const foodUnit = new FoodUnit(newFoodPosition.x, newFoodPosition.y);
+          foodUnit.cycle = frameCycle;
+          foodUnit.duration = randomInt(MIN_FOOD_DURATION, MAX_FOOD_DURATION);
+          food.push(foodUnit);
+          onFoodAdd(foodUnit);
+        }
       }
 
       this._generateNextFoodCycle();

@@ -33,7 +33,7 @@
   "rules": {
     "comma-dangle": [1, "never"],
     "no-cond-assign": [2, "always"],
-    "no-console": 1,
+    "no-console": 0,
     "no-constant-condition": 1,
     "no-control-regex": 1,
     "no-debugger": 1,
