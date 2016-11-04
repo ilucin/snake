@@ -72,12 +72,14 @@
     renderCycle++;
     renderCycle %= 2;
 
-    for (let i = 0; i < state.snake.length; i++) {
-      setCellState(state.snake[i].x, state.snake[i].y, SNAKE_CELL, renderCycle);
+    const snakePositions = state.snake.getPositions();
+    for (let i = 0; i < snakePositions.length; i++) {
+      setCellState(snakePositions[i].x, snakePositions[i].y, SNAKE_CELL, renderCycle);
     }
 
-    for (let i = 0; i < state.food.length; i++) {
-      setCellState(state.food[i].x, state.food[i].y, FOOD_CELL, renderCycle);
+    const foodPositions = state.food.getPositions();
+    for (let i = 0; i < foodPositions.length; i++) {
+      setCellState(foodPositions[i].x, foodPositions[i].y, FOOD_CELL, renderCycle);
     }
 
     const dirtyCellsClone = dirtyCells.slice();

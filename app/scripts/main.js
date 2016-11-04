@@ -3,30 +3,23 @@
 
   const SnakeGame = window.SnakeGame;
   const {screenWidth, screenHeight, render, init: initCanvas, startFrameLoop} = SnakeGame.Canvas;
-  const {randomInt} = SnakeGame.Utils;
-  const {SNAKE_CELL, EMPTY_CELL, FOOD_CELL, MAX_CYCLE_BETWEEN_FOOD, MAX_FOOD, MAX_FOOD_DURATION, MIN_FOOD_DURATION} = SnakeGame.Consts;
+  const {SNAKE_CELL, EMPTY_CELL, FOOD_CELL} = SnakeGame.Consts;
   const {Direction, Collision} = SnakeGame.Enums;
-  const {Grid} = SnakeGame.Classes;
+  const {Grid, Snake, FoodController} = SnakeGame.Classes;
 
   const grid = new Grid(screenWidth, screenHeight);
+  const snake = new Snake(grid.getRandomEmptyPosition(), Direction.RIGHT);
+  const food = new FoodController();
 
-  const snake = [];
-  const food = [];
   const feedingProcessors = [];
-  const scheduledDirectionChanges = [];
   let frameCycle = 0;
-  let nextFoodCycle;
   let isPaused = false;
 
-  const state = window.state = {
-    snakeDirection: Direction.RIGHT,
-    snake,
-    food
-  };
+  const state = window.state = {snake, food};
 
   function scheduleDirectionChange(dir) {
     if (!isPaused) {
-      scheduledDirectionChanges.push(dir);
+      snake.scheduleDirectionChange(dir);
     }
   }
 
@@ -49,87 +42,31 @@
     location.reload();
   }
 
-  function normalizePosition(pos) {
-    pos.x %= screenWidth;
-    pos.y %= screenHeight;
-
-    if (pos.x < 0) {
-      pos.x = screenWidth + pos.x;
-    }
-
-    if (pos.y < 0) {
-      pos.y = screenHeight + pos.y;
-    }
-
-    return pos;
-  }
-
-  function initSnake() {
-    snake.push(grid.getRandomEmptyPosition());
-  }
-
   function feedSnake() {
-    const pos = {x: snake[0].x, y: snake[0].y};
-    feedingProcessors.push({cycle: frameCycle + snake.length, pos});
-    food.forEach((foodUnit) => {
-      if (foodUnit.x === pos.x && foodUnit.y === pos.y) {
-        food.splice(food.indexOf(foodUnit), 1);
-      }
+    const position = snake.getHeadPosition();
+    feedingProcessors.push({
+      processOnCycle: frameCycle + snake.getLength(),
+      position
     });
+    food.removeFoodUnitAt(position);
   }
 
   function processFeeding() {
     feedingProcessors.forEach(function(feeding) {
-      if (feeding.cycle === frameCycle) {
-        snake.push(feeding.pos);
+      if (feeding.processOnCycle === frameCycle) {
+        snake.addCellAt(feeding.position);
         feedingProcessors.splice(feedingProcessors.indexOf(feeding, 1));
       }
     });
   }
 
-  function isValidDirectionChange(newDir) {
-    const dir = state.snakeDirection;
-    return newDir && (
-      (newDir === Direction.UP && dir !== Direction.DOWN) ||
-      (newDir === Direction.DOWN && dir !== Direction.UP) ||
-      (newDir === Direction.RIGHT && dir !== Direction.LEFT) ||
-      (newDir === Direction.LEFT && dir !== Direction.RIGHT)
-    );
-  }
-
-  function updateSnakeDirection() {
-    let newDir;
-    let isValid;
-
-    do {
-      newDir = scheduledDirectionChanges.shift();
-      isValid = isValidDirectionChange(newDir);
-    } while (!isValid && scheduledDirectionChanges.length > 0);
-
-    if (isValid) {
-      state.snakeDirection = newDir;
-    }
-  }
-
   function moveSnake() {
-    setCellState(snake[snake.length - 1], EMPTY_CELL);
-    for (let i = snake.length - 1; i > 0; i--) {
-      snake[i].x = snake[i - 1].x;
-      snake[i].y = snake[i - 1].y;
-    }
+    setCellState(snake.getTailPosition(), EMPTY_CELL);
+    snake.moveInsideOfDimensions(grid.width, grid.height);
+    return setCellState(snake.getHeadPosition(), SNAKE_CELL);
+  }
 
-    if (state.snakeDirection === Direction.RIGHT) {
-      snake[0].x++;
-    } else if (state.snakeDirection === Direction.LEFT) {
-      snake[0].x--;
-    } else if (state.snakeDirection === Direction.UP) {
-      snake[0].y--;
-    } else if (state.snakeDirection === Direction.DOWN) {
-      snake[0].y++;
-    }
-
-    normalizePosition(snake[0]);
-    const collision = setCellState(snake[0], SNAKE_CELL);
+  function processCollision(collision) {
     if (collision === Collision.SNAKE_TO_FOOD) {
       feedSnake();
     } else if (collision === Collision.SNAKE_TO_SNAKE) {
@@ -138,22 +75,20 @@
   }
 
   function processFood() {
-    food.forEach(function(foodUnit) {
-      if (foodUnit.cycle + foodUnit.duration < frameCycle) {
-        food.splice(food.indexOf(foodUnit), 1);
-        setCellState(foodUnit, EMPTY_CELL);
+    food.destroyFood(frameCycle,
+      function processFoodRemovePosition(position) {
+        setCellState(position, EMPTY_CELL);
       }
-    });
+    );
 
-    if (frameCycle % MAX_CYCLE_BETWEEN_FOOD === nextFoodCycle && food.length < MAX_FOOD) {
-      const foodUnit = grid.getRandomEmptyPosition();
-      foodUnit.cycle = frameCycle;
-      foodUnit.duration = randomInt(MIN_FOOD_DURATION, MAX_FOOD_DURATION);
-      food.push(foodUnit);
-      setCellState(foodUnit, FOOD_CELL);
-    }
-
-    nextFoodCycle = randomInt(0, MAX_CYCLE_BETWEEN_FOOD);
+    food.generateFood(frameCycle,
+      function getNewFoodPosition() {
+        return grid.getRandomEmptyPosition();
+      },
+      function processFoodAddPosition(position) {
+        setCellState(position, FOOD_CELL);
+      }
+    );
   }
 
   function toggleIsPaused() {
@@ -176,7 +111,6 @@
   });
 
   initCanvas();
-  initSnake();
 
   startFrameLoop(function() {
     if (isPaused) {
@@ -188,8 +122,8 @@
       frameCycle = 0;
     }
 
-    updateSnakeDirection();
-    moveSnake();
+    snake.updateDirection();
+    processCollision(moveSnake());
     processFeeding();
     processFood();
     render(state);
