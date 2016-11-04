@@ -1,4 +1,4 @@
-(window.SnakeGame = window.SnakeGame || {}).Enums = (function() {
+SnakeGame.Enums = (function() {
   'use strict';
 
   return {

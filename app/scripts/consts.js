@@ -1,4 +1,4 @@
-(window.SnakeGame = window.SnakeGame || {}).Consts = (function() {
+SnakeGame.Consts = (function() {
   'use strict';
 
   return {

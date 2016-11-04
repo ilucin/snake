@@ -1,10 +1,11 @@
-(window.SnakeGame = window.SnakeGame || {}).Game = (function() {
+SnakeGame.Game = (function() {
   'use strict';
 
-  const SnakeGame = window.SnakeGame;
   const {SNAKE_CELL, EMPTY_CELL, FOOD_CELL} = SnakeGame.Consts;
   const {Direction, Collision} = SnakeGame.Enums;
-  const {Grid, Snake, FoodController} = SnakeGame.Classes;
+  const Grid = SnakeGame.Grid;
+  const Snake = SnakeGame.Snake;
+  const FoodController = SnakeGame.FoodController;
 
   let grid;
   let snake;

@@ -247,5 +247,8 @@
     "require-yield": 1,
     "template-curly-spacing": [1, "never"],
     "yield-star-spacing": [1, "before"]
+  },
+  "globals": {
+    "SnakeGame": true
   }
 }

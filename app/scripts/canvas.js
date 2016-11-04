@@ -1,7 +1,6 @@
-(window.SnakeGame = window.SnakeGame || {}).Canvas = (function() {
+SnakeGame.Canvas = (function() {
   'use strict';
 
-  const SnakeGame = window.SnakeGame;
   const {CELL_SIZE, FRAME_RATE_DROP, SNAKE_CELL, EMPTY_CELL, FOOD_CELL} = SnakeGame.Consts;
 
   const canvasEl = document.querySelector('.canvas');

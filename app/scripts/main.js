@@ -1,7 +1,6 @@
 (function() {
   'use strict';
 
-  const SnakeGame = window.SnakeGame;
   const {screenWidth, screenHeight, render, init: initCanvas, startFrameLoop} = SnakeGame.Canvas;
   const {Direction} = SnakeGame.Enums;
   const {start: startGame} = SnakeGame.Game;
