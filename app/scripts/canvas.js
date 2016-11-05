@@ -4,8 +4,8 @@ SnakeGame.Canvas = (function() {
   const {CELL_SIZE, FRAME_RATE_DROP, SNAKE_CELL, EMPTY_CELL, FOOD_CELL} = SnakeGame.Consts;
 
   const canvasEl = document.querySelector('.canvas');
-  const screenWidth = Math.floor(window.innerWidth / CELL_SIZE);
-  const screenHeight = Math.floor(window.innerHeight / CELL_SIZE);
+  const screenWidth = Math.floor(canvasEl.getBoundingClientRect().width / CELL_SIZE);
+  const screenHeight = Math.floor(canvasEl.getBoundingClientRect().height / CELL_SIZE);
   const grid = {};
   const dirtyCells = [];
   let renderCycle = 0;

@@ -1,7 +1,20 @@
 // bower:scss
 // endbower
 
+@mixin mobile {
+  @media (max-width: 767px) { @content; }
+}
+
+@mixin stretch($top: auto, $right: auto, $bottom: auto, $left: auto, $position: absolute) {
+  position: $position;
+  top: $top;
+  bottom: $bottom;
+  left: $left;
+  right: $right;
+}
+
 body {
+  @include stretch(0, 0, 0, 0);
   background: #fafafa;
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #333;
@@ -9,20 +22,46 @@ body {
   padding: 0;
   display: flex;
   align-items: center;
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
   overflow: hidden;
 }
 
+.mobile-controls {
+  @include stretch(auto, 0, 0, 0);
+  height: 70px;
+  z-index: 1;
+  display: none;
+  align-items: center;
+  box-shadow: 0 0 5px 0 rgba(#000, 0.1);
+  background-color: #FFF;
+
+  @include mobile {
+    display: flex;
+  }
+
+  .mobile-controls__control {
+    width: 50px;
+    height: 50px;
+    font-weight: 500;
+    font-family: monospace;
+    font-size: 20px;
+  }
+
+  .mobile-controls__control--right {
+    margin-right: 10px;
+  }
+
+  .mobile-controls__control--pause {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .mobile-controls__control--left {
+    margin-left: 10px;
+  }
+}
+
 .pause-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  @include stretch(0, 0, 0, 0);
   overflow: hidden;
   background-color: rgba(#000, 0.2);
   display: none;
@@ -43,7 +82,12 @@ body {
 }
 
 .canvas {
+  @include stretch(0, 0, 0, 0);
   margin: auto;
+
+  @include mobile {
+    bottom: 70px;
+  }
 }
 
 .cell {

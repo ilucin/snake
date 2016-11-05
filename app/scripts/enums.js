@@ -6,7 +6,9 @@ SnakeGame.Enums = (function() {
       UP: 1,
       DOWN: 2,
       RIGHT: 3,
-      LEFT: 4
+      LEFT: 4,
+      RELATIVE_RIGHT: 5,
+      RELATIVE_LEFT: 6
     },
 
     Collision: {

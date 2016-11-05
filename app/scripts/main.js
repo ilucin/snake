@@ -18,6 +18,18 @@
     document.body.classList[isPaused ? 'add' : 'remove']('is-game-paused');
   }
 
+  document.querySelector('.mobile-controls__control--left').addEventListener('touchstart', function() {
+    game.onInputMove(Direction.RELATIVE_LEFT);
+  });
+
+  document.querySelector('.mobile-controls__control--right').addEventListener('touchend', function() {
+    game.onInputMove(Direction.RELATIVE_RIGHT);
+  });
+
+  document.querySelector('.mobile-controls__control--pause').addEventListener('click', function() {
+    toggleIsPaused();
+  });
+
   document.addEventListener('keydown', function(ev) {
     if (ev.which === 40) { // arrow down
       game.onInputMove(Direction.DOWN);

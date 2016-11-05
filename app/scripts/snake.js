@@ -5,6 +5,18 @@ SnakeGame.Snake = (function() {
   const {Direction} = SnakeGame.Enums;
   const {Position, CellCollection} = SnakeGame.Classes;
 
+  const RelativeLeftDirectionMap = {};
+  RelativeLeftDirectionMap[Direction.UP] = Direction.LEFT;
+  RelativeLeftDirectionMap[Direction.LEFT] = Direction.DOWN;
+  RelativeLeftDirectionMap[Direction.DOWN] = Direction.RIGHT;
+  RelativeLeftDirectionMap[Direction.RIGHT] = Direction.UP;
+
+  const RelativeRightDirectionMap = {};
+  RelativeRightDirectionMap[Direction.UP] = Direction.RIGHT;
+  RelativeRightDirectionMap[Direction.RIGHT] = Direction.DOWN;
+  RelativeRightDirectionMap[Direction.DOWN] = Direction.LEFT;
+  RelativeRightDirectionMap[Direction.LEFT] = Direction.UP;
+
   class SnakeCell extends Position {
     constructor() {
       super(...arguments);
@@ -46,7 +58,14 @@ SnakeGame.Snake = (function() {
     }
 
     scheduleDirectionChange(direction) {
-      this._scheduledDirectionChanges.push(direction);
+      let newDirection = direction;
+      if (direction === Direction.RELATIVE_LEFT) {
+        newDirection = RelativeLeftDirectionMap[this._direction];
+      } else if (direction === Direction.RELATIVE_RIGHT) {
+        newDirection = RelativeRightDirectionMap[this._direction];
+      }
+
+      this._scheduledDirectionChanges.push(newDirection);
     }
 
     getTailPosition() {
