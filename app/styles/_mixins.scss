@@ -1,0 +1,11 @@
+@mixin mobile {
+  @media (max-width: 767px) { @content; }
+}
+
+@mixin stretch($top: auto, $right: auto, $bottom: auto, $left: auto, $position: absolute) {
+  position: $position;
+  top: $top;
+  bottom: $bottom;
+  left: $left;
+  right: $right;
+}

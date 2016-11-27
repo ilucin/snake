@@ -1,0 +1,57 @@
+.menu {
+  @include stretch(0, 0, 0, 0);
+  display: none;
+  align-items: center;
+
+  @each $theme, $colors in $theme-map {
+    [data-theme="#{$theme}"] & {
+      background-color: map-get($colors, 'overlay-bg-color');
+    }
+  }
+
+  .is-menu-shown & {
+    display: flex;
+  }
+
+  .menu__popup {
+    margin: auto;
+    padding: 50px;
+
+    @include mobile {
+      padding: 20px;
+    }
+
+    @each $theme, $colors in $theme-map {
+      [data-theme="#{$theme}"] & {
+        background-color: map-get($colors, 'menu-bg-color');
+      }
+    }
+  }
+
+  .menu__title {
+    font-size: 30px;
+    margin-bottom: 30px;
+  }
+
+  .menu__section {
+
+  }
+
+  .menu__section-preference {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+  }
+
+  .menu__section-preference-label {
+    width: 100px;
+  }
+
+  .menu__section-preference-field {
+    flex: 1;
+  }
+
+  .menu__about {
+    margin-top: 50px;
+  }
+}

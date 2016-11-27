@@ -3,6 +3,7 @@ SnakeGame.Ui = (function() {
 
   const document = window.document;
   const evented = SnakeGame.Evented;
+  const Consts = SnakeGame.Consts;
 
   const UiEvent = {
     RELATIVE_LEFT: 'relative-left',
@@ -14,19 +15,35 @@ SnakeGame.Ui = (function() {
     RIGHT: 'keydown-arrow-right'
   };
 
+  let isMenuShown = false;
   const ui = evented({UiEvent});
+  const mobileControlLeftEl = document.querySelector('.js-mobile-control-left');
+  const mobileControlRightEl = document.querySelector('.js-mobile-control-right');
+  const mobileControlMenuEl = document.querySelector('.js-mobile-control-menu');
+  const menuEl = document.querySelector('.js-menu');
+  const menuInputSize = menuEl.querySelector('.js-menu-input-size');
+  const menuInputSpeed = menuEl.querySelector('.js-menu-input-speed');
+  const menuInputFood = menuEl.querySelector('.js-menu-input-food');
 
-  document.querySelector('.mobile-controls__control--left').addEventListener('touchstart', function() {
-    ui.trigger(UiEvent.RELATIVE_LEFT);
-  });
+  function toggleMenu() {
+    isMenuShown = !isMenuShown;
+    document.body.classList[isMenuShown ? 'add' : 'remove']('is-menu-shown');
+  }
 
-  document.querySelector('.mobile-controls__control--right').addEventListener('touchend', function() {
-    ui.trigger(UiEvent.RELATIVE_RIGHT);
-  });
+  function initMenu() {
+    menuInputSize.value = Consts.CELL_SIZE;
+    menuInputSpeed.value = Consts.FRAME_RATE_DROP;
+    menuInputFood.value = Consts.MAX_FOOD;
+  }
 
-  document.querySelector('.mobile-controls__control--pause').addEventListener('click', function() {
+  function triggerPause() {
     ui.trigger(UiEvent.PAUSE);
-  });
+    toggleMenu();
+  }
+
+  mobileControlLeftEl.addEventListener('touchstart', () => ui.trigger(UiEvent.RELATIVE_LEFT));
+  mobileControlRightEl.addEventListener('touchstart', () => ui.trigger(UiEvent.RELATIVE_RIGHT));
+  mobileControlMenuEl.addEventListener('click', triggerPause);
 
   document.addEventListener('keydown', function(ev) {
     if (ev.which === 40) { // arrow down
@@ -38,9 +55,16 @@ SnakeGame.Ui = (function() {
     } else if (ev.which === 37) { // arrow left
       ui.trigger(UiEvent.LEFT);
     } else if (ev.which === 80) { // p
-      ui.trigger(UiEvent.PAUSE);
+      triggerPause();
     }
   });
+
+  initMenu();
+
+  setTimeout(function() {
+    ui.trigger(UiEvent.PAUSE);
+    toggleMenu();
+  }, 100);
 
   return ui;
 })();

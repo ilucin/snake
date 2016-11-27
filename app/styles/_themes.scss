@@ -1,0 +1,12 @@
+$theme-map: (
+  light: (
+    body-bg-color: $color-grey-light-1,
+    menu-bg-color: $color-white,
+    overlay-bg-color: rgba($color-black, 0.2)
+  ),
+  dark: (
+    body-bg-color: $color-grey-dark-1,
+    menu-bg-color: $color-grey-light-1,
+    overlay-bg-color: rgba($color-white, 0.4)
+  )
+);

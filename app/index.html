@@ -21,7 +21,7 @@
     <!-- endbuild -->
 
   </head>
-  <body>
+  <body data-theme="light">
     <div class="canvas">
     </div>
 
@@ -30,9 +30,43 @@
     </div>
 
     <div class="mobile-controls">
-      <button class="mobile-controls__control mobile-controls__control--left"> L </button>
-      <button class="mobile-controls__control mobile-controls__control--pause"> P </button>
-      <button class="mobile-controls__control mobile-controls__control--right"> R </button>
+      <button class="mobile-controls__control mobile-controls__control--left js-mobile-control-left"> L </button>
+      <button class="mobile-controls__control mobile-controls__control--menu js-mobile-control-menu"> M </button>
+      <button class="mobile-controls__control mobile-controls__control--right js-mobile-control-right"> R </button>
+    </div>
+
+    <div class="menu js-menu">
+      <div class="menu__popup">
+        <div class="menu__title"> Snake </div>
+        <div class="menu__section">
+          <div class="menu__section-preferences">
+            <div class="menu__section-preference">
+              <div class="menu__section-preference-label"> Size </div>
+              <div class="menu__section-preference-field">
+                <input type="range" class="menu__section-preference-field js-menu-input-size" min="10" max="50">
+              </div>
+            </div>
+
+            <div class="menu__section-preference">
+              <div class="menu__section-preference-label"> Speed </div>
+              <div class="menu__section-preference-field">
+                <input type="range" class="menu__section-preference-field js-menu-input-speed">
+              </div>
+            </div>
+
+            <div class="menu__section-preference">
+              <div class="menu__section-preference-label"> Food </div>
+              <div class="menu__section-preference-field">
+                <input type="range" class="menu__section-preference-field js-menu-input-food">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu__about">
+          Made by <b>Ivan Lučin</b>, 4 fun!
+        </div>
+      </div>
     </div>
 
     <!-- build:js scripts/vendor.js -->
