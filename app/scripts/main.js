@@ -4,6 +4,8 @@
   const {screenWidth, screenHeight, render, init: initCanvas, startFrameLoop} = SnakeGame.Canvas;
   const {Direction} = SnakeGame.Enums;
   const {start: startGame} = SnakeGame.Game;
+  const ui = SnakeGame.Ui;
+  const UiEvent = ui.UiEvent;
 
   let isPaused = false;
 
@@ -18,31 +20,13 @@
     document.body.classList[isPaused ? 'add' : 'remove']('is-game-paused');
   }
 
-  document.querySelector('.mobile-controls__control--left').addEventListener('touchstart', function() {
-    game.onInputMove(Direction.RELATIVE_LEFT);
-  });
-
-  document.querySelector('.mobile-controls__control--right').addEventListener('touchend', function() {
-    game.onInputMove(Direction.RELATIVE_RIGHT);
-  });
-
-  document.querySelector('.mobile-controls__control--pause').addEventListener('click', function() {
-    toggleIsPaused();
-  });
-
-  document.addEventListener('keydown', function(ev) {
-    if (ev.which === 40) { // arrow down
-      game.onInputMove(Direction.DOWN);
-    } else if (ev.which === 39) { // arrow right
-      game.onInputMove(Direction.RIGHT);
-    } else if (ev.which === 38) { // arrow up
-      game.onInputMove(Direction.UP);
-    } else if (ev.which === 37) { // arrow left
-      game.onInputMove(Direction.LEFT);
-    } else if (ev.which === 80) { // p
-      toggleIsPaused();
-    }
-  });
+  ui.on(UiEvent.PAUSE, () => toggleIsPaused());
+  ui.on(UiEvent.RELATIVE_LEFT, () => game.onInputMove(Direction.RELATIVE_LEFT));
+  ui.on(UiEvent.RELATIVE_RIGHT, () => game.onInputMove(Direction.RELATIVE_RIGHT));
+  ui.on(UiEvent.DOWN, () => game.onInputMove(Direction.DOWN));
+  ui.on(UiEvent.RIGHT, () => game.onInputMove(Direction.RIGHT));
+  ui.on(UiEvent.UP, () => game.onInputMove(Direction.UP));
+  ui.on(UiEvent.LEFT, () => game.onInputMove(Direction.LEFT));
 
   startFrameLoop(function() {
     if (isPaused) {
