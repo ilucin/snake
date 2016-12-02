@@ -1,0 +1,19 @@
+.game-start-popup {
+  .popup__body {
+    padding: 50px;
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .game-start-popup__title {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+
+  .game-start-popup__start-game-button {
+    font-weight: 500;
+    padding: 10px;
+    font-size: 18px;
+  }
+}

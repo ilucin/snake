@@ -1,0 +1,23 @@
+.game-end-popup {
+  .popup__body {
+    padding: 50px;
+    font-size: 18px;
+    text-align: center;
+  }
+
+  .game-end-popup__title {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 20px;
+  }
+
+  .game-end-popup__score {
+    margin-bottom: 20px;
+  }
+
+  .game-end-popup__new-game-button {
+    font-weight: 500;
+    padding: 10px;
+    font-size: 18px;
+  }
+}

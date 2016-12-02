@@ -12,38 +12,90 @@ SnakeGame.Ui = (function() {
     UP: 'keydown-arrow-up',
     DOWN: 'keydown-arrow-down',
     LEFT: 'keydown-arrow-left',
-    RIGHT: 'keydown-arrow-right'
+    RIGHT: 'keydown-arrow-right',
+    START: 'start'
   };
 
-  let isMenuShown = false;
-  const ui = evented({UiEvent});
-  const mobileControlLeftEl = document.querySelector('.js-mobile-control-left');
-  const mobileControlRightEl = document.querySelector('.js-mobile-control-right');
-  const mobileControlMenuEl = document.querySelector('.js-mobile-control-menu');
-  const menuEl = document.querySelector('.js-menu');
-  const menuInputSize = menuEl.querySelector('.js-menu-input-size');
-  const menuInputSpeed = menuEl.querySelector('.js-menu-input-speed');
-  const menuInputFood = menuEl.querySelector('.js-menu-input-food');
+  let score;
+  const ui = evented({});
+  const elMap = Array.prototype.slice.call(document.querySelectorAll('[js]')).reduce(function(obj, el) {
+    obj[el.getAttribute('js')] = el;
+    return obj;
+  }, {});
 
-  function toggleMenu() {
-    isMenuShown = !isMenuShown;
-    document.body.classList[isMenuShown ? 'add' : 'remove']('is-menu-shown');
+  function toggleClass(el, klass, val) {
+    el.classList[val ? 'add' : 'remove'](klass);
   }
 
+  const popup = (function() {
+    let activePopupEl = null;
+
+    function show(el) {
+      if (!activePopupEl) {
+        toggleClass(el, 'is-shown', true);
+        toggleClass(elMap.body, 'is-popup-shown', true);
+        activePopupEl = el;
+      }
+    }
+
+    function hide() {
+      if (activePopupEl) {
+        toggleClass(activePopupEl, 'is-shown', false);
+        toggleClass(elMap.body, 'is-popup-shown', false);
+        activePopupEl = null;
+      }
+    }
+
+    function toggle(el) {
+      return activePopupEl ? hide() : show(el);
+    }
+
+    function isShown(el) {
+      return activePopupEl === el;
+    }
+
+    return {show, hide, toggle, isShown};
+  })();
+
   function initMenu() {
-    menuInputSize.value = Consts.CELL_SIZE;
-    menuInputSpeed.value = Consts.FRAME_RATE_DROP;
-    menuInputFood.value = Consts.MAX_FOOD;
+    elMap.menuInputSize.value = Consts.CELL_SIZE;
+    elMap.menuInputSpeed.value = Consts.FRAME_RATE_DROP;
+    elMap.menuInputFood.value = Consts.MAX_FOOD;
+  }
+
+  function updateStats(stats) {
+    if (score !== stats.score) {
+      score = stats.score;
+      elMap.statsScore.textContent = score;
+    }
   }
 
   function triggerPause() {
     ui.trigger(UiEvent.PAUSE);
-    toggleMenu();
+    popup.toggle(elMap.menu);
   }
 
-  mobileControlLeftEl.addEventListener('touchstart', () => ui.trigger(UiEvent.RELATIVE_LEFT));
-  mobileControlRightEl.addEventListener('touchstart', () => ui.trigger(UiEvent.RELATIVE_RIGHT));
-  mobileControlMenuEl.addEventListener('click', triggerPause);
+  function reload() {
+    window.location.reload();
+  }
+
+  function start() {
+    elMap.body.removeEventListener('keydown', start);
+    popup.hide(elMap.gameStartPopup);
+    ui.trigger(UiEvent.START);
+  }
+
+  function showGameEndPopup(stats) {
+    elMap.gameEndPopupScoreValue.textContent = stats.score;
+    popup.show(elMap.gameEndPopup);
+  }
+
+  elMap.body.addEventListener('keydown', start);
+  elMap.mobileControlLeft.addEventListener('touchstart', () => ui.trigger(UiEvent.RELATIVE_LEFT));
+  elMap.mobileControlRight.addEventListener('touchstart', () => ui.trigger(UiEvent.RELATIVE_RIGHT));
+  elMap.mobileControlMenu.addEventListener('click', triggerPause);
+  elMap.gameEndPopupNewGameButton.addEventListener('click', reload);
+  elMap.gameStartPopupStartGameButton.addEventListener('click', start);
 
   document.addEventListener('keydown', function(ev) {
     if (ev.which === 40) { // arrow down
@@ -61,10 +113,7 @@ SnakeGame.Ui = (function() {
 
   initMenu();
 
-  setTimeout(function() {
-    ui.trigger(UiEvent.PAUSE);
-    toggleMenu();
-  }, 100);
+  popup.show(elMap.gameStartPopup);
 
-  return ui;
+  return Object.assign(ui, {UiEvent, updateStats, showGameEndPopup});
 })();

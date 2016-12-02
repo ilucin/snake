@@ -7,33 +7,40 @@
   const ui = SnakeGame.Ui;
   const UiEvent = ui.UiEvent;
 
-  let isPaused = false;
+  ui.on(UiEvent.START, function() {
+    let isPaused = false;
+    let isFinished = false;
 
-  initCanvas();
+    initCanvas();
 
-  const game = startGame(screenWidth, screenHeight, function onGameEnd() {
-    location.reload();
-  });
+    const game = startGame(screenWidth, screenHeight, function onGameEnd() {
+      isFinished = true;
+      isPaused = true;
+      ui.off();
+      ui.showGameEndPopup(game.stats);
+    });
 
-  function toggleIsPaused() {
-    isPaused = !isPaused;
-    document.body.classList[isPaused ? 'add' : 'remove']('is-game-paused');
-  }
-
-  ui.on(UiEvent.PAUSE, () => toggleIsPaused());
-  ui.on(UiEvent.RELATIVE_LEFT, () => game.onInputMove(Direction.RELATIVE_LEFT));
-  ui.on(UiEvent.RELATIVE_RIGHT, () => game.onInputMove(Direction.RELATIVE_RIGHT));
-  ui.on(UiEvent.DOWN, () => game.onInputMove(Direction.DOWN));
-  ui.on(UiEvent.RIGHT, () => game.onInputMove(Direction.RIGHT));
-  ui.on(UiEvent.UP, () => game.onInputMove(Direction.UP));
-  ui.on(UiEvent.LEFT, () => game.onInputMove(Direction.LEFT));
-
-  startFrameLoop(function() {
-    if (isPaused) {
-      return;
+    function toggleIsPaused() {
+      isPaused = !isPaused;
+      document.body.classList[isPaused ? 'add' : 'remove']('is-game-paused');
     }
 
-    game.frameLoop();
-    render(game);
+    ui.on(UiEvent.PAUSE, () => toggleIsPaused());
+    ui.on(UiEvent.RELATIVE_LEFT, () => game.onInputMove(Direction.RELATIVE_LEFT));
+    ui.on(UiEvent.RELATIVE_RIGHT, () => game.onInputMove(Direction.RELATIVE_RIGHT));
+    ui.on(UiEvent.DOWN, () => game.onInputMove(Direction.DOWN));
+    ui.on(UiEvent.RIGHT, () => game.onInputMove(Direction.RIGHT));
+    ui.on(UiEvent.UP, () => game.onInputMove(Direction.UP));
+    ui.on(UiEvent.LEFT, () => game.onInputMove(Direction.LEFT));
+
+    startFrameLoop(function() {
+      if (isPaused || isFinished) {
+        return;
+      }
+
+      game.frameLoop();
+      ui.updateStats(game.stats);
+      render(game);
+    });
   });
 })();

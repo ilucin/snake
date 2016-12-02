@@ -13,6 +13,7 @@ SnakeGame.Game = (function() {
   let feedingProcessors;
   let frameCycle;
   let finishGame;
+  let stats;
 
   function setCellState(pos, cellState) {
     if (cellState === SNAKE_CELL) {
@@ -36,6 +37,7 @@ SnakeGame.Game = (function() {
       position: position.clone()
     });
     food.removeFoodUnitAt(position);
+    stats.score++;
   }
 
   function processFeeding() {
@@ -101,13 +103,9 @@ SnakeGame.Game = (function() {
     feedingProcessors = [];
     frameCycle = 4;
     finishGame = onGameEnd;
+    stats = {score: 0};
 
-    return {
-      snake,
-      food,
-      frameLoop,
-      onInputMove
-    };
+    return {snake, food, frameLoop, onInputMove, stats};
   }
 
   function destroy() {
@@ -119,8 +117,5 @@ SnakeGame.Game = (function() {
     finishGame = null;
   }
 
-  return {
-    start,
-    destroy
-  };
+  return {start, destroy};
 })();

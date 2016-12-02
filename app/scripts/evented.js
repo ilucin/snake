@@ -8,7 +8,7 @@ SnakeGame.Evented = (function() {
   }
 
   return function assignEventedInstance(obj) {
-    const handlers = {};
+    let handlers = {};
 
     function on(ev, clb) {
       assert('ev has to be a string', ev && typeof ev === 'string');
@@ -18,16 +18,20 @@ SnakeGame.Evented = (function() {
     }
 
     function off(ev, clb) {
-      if (handlers[ev]) {
-        if (clb) {
-          const idx = handlers[ev].indexOf(clb);
+      if (ev) {
+        if (handlers[ev]) {
+          if (clb) {
+            const idx = handlers[ev].indexOf(clb);
 
-          if (idx >= 0) {
-            handlers[ev].splice(idx, 1);
+            if (idx >= 0) {
+              handlers[ev].splice(idx, 1);
+            }
+          } else {
+            handlers[ev] = [];
           }
-        } else {
-          handlers[ev] = [];
         }
+      } else {
+        handlers = {};
       }
     }
 
