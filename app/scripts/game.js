@@ -8,9 +8,8 @@ SnakeGame.Game = (function() {
   const FoodController = SnakeGame.FoodController;
 
   let grid;
-  let snake;
-  let food;
-  let feedingProcessors;
+  let outerSnake;
+  let outerFood;
   let frameCycle;
   let finishGame;
   let stats;
@@ -30,40 +29,31 @@ SnakeGame.Game = (function() {
     return null;
   }
 
-  function feedSnake() {
-    const position = snake.getHeadPosition();
-    feedingProcessors.push({
-      processOnCycle: frameCycle + snake.getLength(),
-      position: position.clone()
-    });
+  function feedSnake(snake, food) {
+    const position = snake.feed();
     food.removeFoodUnitAt(position);
     stats.score++;
   }
 
-  function processFeeding() {
-    feedingProcessors.forEach(function(feeding) {
-      if (feeding.processOnCycle === frameCycle) {
-        snake.addCellAt(feeding.position);
-        feedingProcessors.splice(feedingProcessors.indexOf(feeding), 1);
-      }
-    });
+  function processFeeding(snake) {
+    snake.processFood();
   }
 
-  function moveSnake() {
+  function moveSnake(snake) {
     setCellState(snake.getTailPosition(), EMPTY_CELL);
     snake.moveInsideOfDimensions(grid.width, grid.height);
     return setCellState(snake.getHeadPosition(), SNAKE_CELL);
   }
 
-  function processCollision(collision) {
+  function processCollision(snake, food, collision) {
     if (collision === Collision.SNAKE_TO_FOOD) {
-      feedSnake();
+      feedSnake(snake, food);
     } else if (collision === Collision.SNAKE_TO_SNAKE) {
       finishGame();
     }
   }
 
-  function processFood() {
+  function processFood(food) {
     food.destroyFood(frameCycle,
       function processFoodRemovePosition(position) {
         setCellState(position, EMPTY_CELL);
@@ -80,8 +70,12 @@ SnakeGame.Game = (function() {
     );
   }
 
-  function onInputMove(direction) {
+  function onInputMove(snake, direction) {
     snake.scheduleDirectionChange(direction);
+  }
+
+  function updateSnakeDirection(snake) {
+    snake.updateDirection();
   }
 
   function frameLoop() {
@@ -90,29 +84,35 @@ SnakeGame.Game = (function() {
       frameCycle = 0;
     }
 
-    snake.updateDirection();
-    processCollision(moveSnake());
-    processFeeding();
-    processFood();
+    updateSnakeDirection(outerSnake);
+    processCollision(outerSnake, outerFood, moveSnake(outerSnake));
+    processFeeding(outerSnake);
+    processFood(outerFood);
   }
 
   function start(width, height, onGameEnd) {
     grid = new Grid(width, height);
-    snake = new Snake(grid.getRandomEmptyPosition(), Direction.RIGHT);
-    food = new FoodController();
-    feedingProcessors = [];
+    outerSnake = new Snake(grid.getRandomEmptyPosition(), Direction.RIGHT);
+    outerFood = new FoodController();
     frameCycle = 4;
     finishGame = onGameEnd;
     stats = {score: 0};
 
-    return {snake, food, frameLoop, onInputMove, stats};
+    return {
+      snake: outerSnake,
+      food: outerFood,
+      frameLoop,
+      stats,
+      onInputMove(dir) {
+        onInputMove(outerSnake, dir);
+      }
+    };
   }
 
   function destroy() {
     grid = null;
-    snake = null;
-    food = null;
-    feedingProcessors = null;
+    outerSnake = null;
+    outerFood = null;
     frameCycle = null;
     finishGame = null;
   }

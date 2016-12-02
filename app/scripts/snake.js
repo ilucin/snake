@@ -29,6 +29,7 @@ SnakeGame.Snake = (function() {
       super();
       this._cells.push(new SnakeCell(position.x, position.y));
       this._direction = direction;
+      this._stomach = [];
       this._scheduledDirectionChanges = [];
     }
 
@@ -110,6 +111,21 @@ SnakeGame.Snake = (function() {
 
     addCellAt(position) {
       this._cells.push(new SnakeCell(position.x, position.y));
+    }
+
+    feed() {
+      const position = this.getHeadPosition();
+      this._stomach.push({processCycle: this.getLength(), position: position.clone()});
+      return position;
+    }
+
+    processFood() {
+      this._stomach.forEach((unprocessedFood) => {
+        if (--unprocessedFood.processCycle === 0) {
+          this.addCellAt(unprocessedFood.position);
+          this._stomach.splice(this._stomach.indexOf(unprocessedFood), 1);
+        }
+      });
     }
   }
 
