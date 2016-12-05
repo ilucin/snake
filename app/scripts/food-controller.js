@@ -14,39 +14,41 @@ SnakeGame.FoodController = (function() {
 
   class FoodController {
     constructor() {
-      this._food = [];
-      this._generateNextFoodCycle();
+      this.config = {
+        maxFood: MAX_FOOD,
+        maxCycleBetweenFood: MAX_CYCLE_BETWEEN_FOOD,
+        maxDuration: MAX_FOOD_DURATION,
+        minDuration: MIN_FOOD_DURATION
+      };
+      this.food = [];
     }
 
-    destroyFood(frameCycle, onFoodRemove) {
-      const food = this._food;
-      food.forEach(function(foodUnit) {
-        if (foodUnit.cycle + foodUnit.duration < frameCycle) {
-          food.splice(food.indexOf(foodUnit), 1);
-          onFoodRemove(foodUnit);
+    destroyOldFood() {
+      return this.food.reduce((destroyedFood, foodUnit, idx) => {
+        if (--foodUnit.duration === 0) {
+          this.food.splice(idx, 1);
+          destroyedFood.push(foodUnit);
         }
-      });
+        return destroyedFood;
+      }, []);
     }
 
-    generateFood(frameCycle, getNewFoodPosition, onFoodAdd) {
-      const food = this._food;
-      if (frameCycle % MAX_CYCLE_BETWEEN_FOOD === this._nextFoodCycle && food.length < MAX_FOOD) {
+    generateNewFood(getNewFoodPosition) {
+      if (this.shouldGenerateFood()) {
         const newFoodPosition = getNewFoodPosition();
 
         if (newFoodPosition) {
           const foodUnit = new FoodUnit(newFoodPosition.x, newFoodPosition.y);
-          foodUnit.cycle = frameCycle;
-          foodUnit.duration = randomInt(MIN_FOOD_DURATION, MAX_FOOD_DURATION);
-          food.push(foodUnit);
-          onFoodAdd(foodUnit);
+          foodUnit.duration = randomInt(this.config.minDuration, this.config.maxDuration);
+          this.food.push(foodUnit);
+          return foodUnit;
         }
       }
-
-      this._generateNextFoodCycle();
+      return false;
     }
 
     removeFoodUnitAt(position) {
-      const food = this._food;
+      const food = this.food;
       for (let i = 0; i < food.length; i++) {
         if (food[i].x === position.x && food[i].y === position.y) {
           food.splice(food.indexOf(food[i]), 1);
@@ -57,11 +59,11 @@ SnakeGame.FoodController = (function() {
     }
 
     getPositions() {
-      return this._food;
+      return this.food;
     }
 
-    _generateNextFoodCycle() {
-      this._nextFoodCycle = randomInt(0, MAX_CYCLE_BETWEEN_FOOD);
+    shouldGenerateFood() {
+      return this.food.length < this.config.maxFood && Math.random() <= (1 / this.config.maxCycleBetweenFood);
     }
   }
 

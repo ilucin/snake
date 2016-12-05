@@ -10,7 +10,6 @@ SnakeGame.Game = (function() {
   let grid;
   let outerSnake;
   let outerFood;
-  let frameCycle;
   let finishGame;
   let stats;
 
@@ -54,20 +53,11 @@ SnakeGame.Game = (function() {
   }
 
   function processFood(food) {
-    food.destroyFood(frameCycle,
-      function processFoodRemovePosition(position) {
-        setCellState(position, EMPTY_CELL);
-      }
-    );
-
-    food.generateFood(frameCycle,
-      function getNewFoodPosition() {
-        return grid.getRandomEmptyPosition() || finishGame();
-      },
-      function processFoodAddPosition(position) {
-        setCellState(position, FOOD_CELL);
-      }
-    );
+    food.destroyOldFood();
+    const foodUnit = food.generateNewFood(() => grid.getRandomEmptyPosition());
+    if (foodUnit) {
+      setCellState(foodUnit, FOOD_CELL);
+    }
   }
 
   function onInputMove(snake, direction) {
@@ -79,11 +69,6 @@ SnakeGame.Game = (function() {
   }
 
   function frameLoop() {
-    frameCycle++;
-    if (frameCycle === Number.MAX_SAFE_INTEGER) {
-      frameCycle = 0;
-    }
-
     updateSnakeDirection(outerSnake);
     processCollision(outerSnake, outerFood, moveSnake(outerSnake));
     processFeeding(outerSnake);
@@ -94,7 +79,6 @@ SnakeGame.Game = (function() {
     grid = new Grid(width, height);
     outerSnake = new Snake(grid.getRandomEmptyPosition(), Direction.RIGHT);
     outerFood = new FoodController();
-    frameCycle = 4;
     finishGame = onGameEnd;
     stats = {score: 0};
 
@@ -113,7 +97,6 @@ SnakeGame.Game = (function() {
     grid = null;
     outerSnake = null;
     outerFood = null;
-    frameCycle = null;
     finishGame = null;
   }
 
