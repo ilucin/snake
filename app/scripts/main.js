@@ -3,7 +3,7 @@
 
   const {screenWidth, screenHeight, render, init: initCanvas, startFrameLoop} = SnakeGame.Canvas;
   const {Direction} = SnakeGame.Enums;
-  const {start: startGame} = SnakeGame.Game;
+  const startGame = SnakeGame.Game;
   const ui = SnakeGame.Ui;
   const UiEvent = ui.UiEvent;
 
@@ -17,7 +17,8 @@
       isFinished = true;
       isPaused = true;
       ui.off();
-      ui.showGameEndPopup(game.stats);
+      const playerSnake = game.playerSnakes[0];
+      ui.showGameEndPopup(playerSnake.name, playerSnake.isAlive(), playerSnake.score);
     });
 
     function toggleIsPaused() {
@@ -26,12 +27,12 @@
     }
 
     ui.on(UiEvent.PAUSE, () => toggleIsPaused());
-    ui.on(UiEvent.RELATIVE_LEFT, () => game.onInputMove(Direction.RELATIVE_LEFT));
-    ui.on(UiEvent.RELATIVE_RIGHT, () => game.onInputMove(Direction.RELATIVE_RIGHT));
-    ui.on(UiEvent.DOWN, () => game.onInputMove(Direction.DOWN));
-    ui.on(UiEvent.RIGHT, () => game.onInputMove(Direction.RIGHT));
-    ui.on(UiEvent.UP, () => game.onInputMove(Direction.UP));
-    ui.on(UiEvent.LEFT, () => game.onInputMove(Direction.LEFT));
+    ui.on(UiEvent.RELATIVE_LEFT, () => game.inputMoveHandlers[0](Direction.RELATIVE_LEFT));
+    ui.on(UiEvent.RELATIVE_RIGHT, () => game.inputMoveHandlers[0](Direction.RELATIVE_RIGHT));
+    ui.on(UiEvent.DOWN, () => game.inputMoveHandlers[0](Direction.DOWN));
+    ui.on(UiEvent.RIGHT, () => game.inputMoveHandlers[0](Direction.RIGHT));
+    ui.on(UiEvent.UP, () => game.inputMoveHandlers[0](Direction.UP));
+    ui.on(UiEvent.LEFT, () => game.inputMoveHandlers[0](Direction.LEFT));
 
     startFrameLoop(function() {
       if (isPaused || isFinished) {
@@ -39,7 +40,7 @@
       }
 
       game.frameLoop();
-      ui.updateStats(game.stats);
+      ui.updateStats(game.playerSnakes[0].score);
       render(game);
     });
   });

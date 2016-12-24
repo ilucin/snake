@@ -2,18 +2,14 @@ SnakeGame.Game = (function() {
   'use strict';
 
   const {SNAKE_CELL, EMPTY_CELL, FOOD_CELL} = SnakeGame.Consts;
-  const {Direction, Collision} = SnakeGame.Enums;
+  const {Collision} = SnakeGame.Enums;
+  const {getRandomNonRelativeDirection, getRandomName} = SnakeGame.Utils;
   const Grid = SnakeGame.Grid;
-  const Snake = SnakeGame.Snake;
+  const PlayerSnake = SnakeGame.PlayerSnake;
+  const BotSnake = SnakeGame.BotSnake;
   const FoodController = SnakeGame.FoodController;
 
-  let grid;
-  let outerSnake;
-  let outerFood;
-  let finishGame;
-  let stats;
-
-  function setCellState(pos, cellState) {
+  function setCellState(grid, pos, cellState) {
     if (cellState === SNAKE_CELL) {
       const cell = grid.getCell(pos);
 
@@ -31,74 +27,79 @@ SnakeGame.Game = (function() {
   function feedSnake(snake, food) {
     const position = snake.feed();
     food.removeFoodUnitAt(position);
-    stats.score++;
+    snake.score++;
   }
 
   function processFeeding(snake) {
     snake.processFood();
   }
 
-  function moveSnake(snake) {
-    setCellState(snake.getTailPosition(), EMPTY_CELL);
+  function moveSnake(grid, snake) {
+    setCellState(grid, snake.getTailPosition(), EMPTY_CELL);
     snake.moveInsideOfDimensions(grid.width, grid.height);
-    return setCellState(snake.getHeadPosition(), SNAKE_CELL);
+    snake.setCollision(setCellState(grid, snake.getHeadPosition(), SNAKE_CELL));
   }
 
-  function processCollision(snake, food, collision) {
+  function killSnake(snake) {
+    snake.kill();
+  }
+
+  function processCollision(snake, food) {
+    const collision = snake.getCollision();
     if (collision === Collision.SNAKE_TO_FOOD) {
       feedSnake(snake, food);
     } else if (collision === Collision.SNAKE_TO_SNAKE) {
-      finishGame();
+      killSnake(snake);
     }
   }
 
-  function processFood(food) {
+  function processFood(grid, food) {
     food.destroyOldFood();
     const foodUnit = food.generateNewFood(() => grid.getRandomEmptyPosition());
     if (foodUnit) {
-      setCellState(foodUnit, FOOD_CELL);
+      setCellState(grid, foodUnit, FOOD_CELL);
     }
-  }
-
-  function onInputMove(snake, direction) {
-    snake.scheduleDirectionChange(direction);
   }
 
   function updateSnakeDirection(snake) {
     snake.updateDirection();
   }
 
-  function frameLoop() {
-    updateSnakeDirection(outerSnake);
-    processCollision(outerSnake, outerFood, moveSnake(outerSnake));
-    processFeeding(outerSnake);
-    processFood(outerFood);
+  function decideOnNextMove(snake, grid, food) {
+    snake.decideOnNextMove(grid, food);
+  }
+
+  function checkForFinishCondition(snakes, finishGame) {
+    const aliveSnakes = snakes.filter((snake) => snake.isAlive());
+    if (aliveSnakes.length <= 1) {
+      finishGame();
+    }
   }
 
   function start(width, height, onGameEnd) {
-    grid = new Grid(width, height);
-    outerSnake = new Snake(grid.getRandomEmptyPosition(), Direction.RIGHT);
-    outerFood = new FoodController();
-    finishGame = onGameEnd;
-    stats = {score: 0};
+    const grid = new Grid(width, height);
+    const food = new FoodController();
+    const snakes = [
+      new PlayerSnake(getRandomName(), grid.getRandomEmptyPosition(), getRandomNonRelativeDirection()),
+      new BotSnake(grid.getRandomEmptyPosition(), getRandomNonRelativeDirection())
+    ];
 
-    return {
-      snake: outerSnake,
-      food: outerFood,
-      frameLoop,
-      stats,
-      onInputMove(dir) {
-        onInputMove(outerSnake, dir);
-      }
-    };
+    const botSnakes = snakes.filter((snake) => snake instanceof BotSnake);
+    const playerSnakes = snakes.filter((snake) => snake instanceof PlayerSnake);
+    const inputMoveHandlers = playerSnakes.map((snake) => snake.getInputHandler());
+
+    function frameLoop() {
+      botSnakes.forEach((snake) => decideOnNextMove(snake, grid, food));
+      snakes.forEach((snake) => updateSnakeDirection(snake));
+      snakes.forEach((snake) => moveSnake(grid, snake));
+      snakes.forEach((snake) => processCollision(snake, food));
+      snakes.forEach((snake) => processFeeding(snake));
+      checkForFinishCondition(snakes, onGameEnd);
+      processFood(grid, food);
+    }
+
+    return {snakes, botSnakes, playerSnakes, food, frameLoop, inputMoveHandlers};
   }
 
-  function destroy() {
-    grid = null;
-    outerSnake = null;
-    outerFood = null;
-    finishGame = null;
-  }
-
-  return {start, destroy};
+  return start;
 })();

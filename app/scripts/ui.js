@@ -63,9 +63,9 @@ SnakeGame.Ui = (function() {
     elMap.menuInputFood.value = Consts.MAX_FOOD;
   }
 
-  function updateStats(stats) {
-    if (score !== stats.score) {
-      score = stats.score;
+  function updateStats(newScore) {
+    if (score !== newScore) {
+      score = newScore;
       elMap.statsScore.textContent = score;
     }
   }
@@ -85,8 +85,9 @@ SnakeGame.Ui = (function() {
     ui.trigger(UiEvent.START);
   }
 
-  function showGameEndPopup(stats) {
-    elMap.gameEndPopupScoreValue.textContent = stats.score;
+  function showGameEndPopup(playerName, isAlive, playerScore) {
+    elMap.gameEndPopupScoreValue.textContent = playerScore;
+    elMap.gameEndPopupTitle.textContent = `${playerName}, you ${isAlive ? 'rule' : 'suck'}!`;
     popup.show(elMap.gameEndPopup);
   }
 

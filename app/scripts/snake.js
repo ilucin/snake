@@ -31,6 +31,8 @@ SnakeGame.Snake = (function() {
       this._direction = direction;
       this._stomach = [];
       this._scheduledDirectionChanges = [];
+      this.alive = true;
+      this.score = 0;
     }
 
     isValidDirectionChange(newDir) {
@@ -126,6 +128,22 @@ SnakeGame.Snake = (function() {
           this._stomach.splice(this._stomach.indexOf(unprocessedFood), 1);
         }
       });
+    }
+
+    setCollision(collision) {
+      this.collision = collision;
+    }
+
+    getCollision() {
+      return this.collision;
+    }
+
+    kill() {
+      this.alive = false;
+    }
+
+    isAlive() {
+      return this.alive;
     }
   }
 

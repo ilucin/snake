@@ -71,9 +71,13 @@ SnakeGame.Canvas = (function() {
     renderCycle++;
     renderCycle %= 2;
 
-    const snakePositions = state.snake.getPositions();
-    for (let i = 0; i < snakePositions.length; i++) {
-      setCellState(snakePositions[i].x, snakePositions[i].y, SNAKE_CELL, renderCycle);
+    const snakes = state.snakes;
+    for (let i = 0; i < snakes.length; i++) {
+      const snakePositions = snakes[i].getPositions();
+
+      for (let j = 0; j < snakePositions.length; j++) {
+        setCellState(snakePositions[j].x, snakePositions[j].y, SNAKE_CELL, renderCycle);
+      }
     }
 
     const foodPositions = state.food.getPositions();
